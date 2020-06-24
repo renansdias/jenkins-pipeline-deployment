@@ -14,7 +14,7 @@ pipeline {
         stage('Identify Changes') {
             steps {
                 sh 'env'
-                def changes = sh(script: 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT', returnStdout: true)
+                changes = sh(script: 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT', returnStdout: true)
                 echo changes
             }
         }
