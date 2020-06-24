@@ -3,9 +3,11 @@ pipeline {
 
     stages {
         stage('Clone Repo') {
-            checkout scm
+            steps {
+                checkout scm
 
-            sh 'ls -la'
+                sh 'ls -la'
+            }
         }
     }
 }
