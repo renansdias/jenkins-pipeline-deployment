@@ -7,6 +7,13 @@ pipeline {
                 checkout scm
 
                 sh 'ls -la'
+                sh 'env'
+            }
+        }
+
+        stage('Identify Changes') {
+            steps {
+                sh 'env'
             }
         }
     }
