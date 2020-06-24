@@ -16,17 +16,22 @@ pipeline {
                 sh 'env'
 
                 script {
-                    def cmd = "git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),.*/\\1/'"
+                    def cmd = "git diff --name-only master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),.*/\\1/'"
+                    sh(script: cmd)
                     def changes = sh(script: cmd, returnStdout: true)
                     echo changes
+                    echo changes
                     echo 'aiushdiaushd'
-                    infraHasChanged(changes)
+                    infraHasChanged(changes.tokenize(','))
                 }
             }
         }
     }
 }
 
-def infraHasChanged(c) {
-    echo c
+def infraHasChanged(changes) {
+    echo "123123123"
+    changes.each { change ->
+        echo change
+    }
 }
