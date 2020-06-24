@@ -14,6 +14,7 @@ pipeline {
         stage('Identify Changes') {
             steps {
                 sh 'env'
+                sh 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT'
             }
         }
     }
