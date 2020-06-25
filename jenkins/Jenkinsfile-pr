@@ -16,8 +16,8 @@ pipeline {
                 sh 'env'
 
                 script {
-                    def cmd = "git diff --name-only master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),.*/\\1/'"
-                    sh(script: cmd)
+                    def cmd = "git diff --name-only $GIT_COMMIT | tr '\n\r' ','" //| sed 's/\\(.*\\),.*/\\1/'
+                    sh 'git diff --name-only $GIT_COMMIT'
                     def changes = sh(script: cmd, returnStdout: true)
                     echo changes
                     echo changes
