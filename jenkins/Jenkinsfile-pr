@@ -20,7 +20,6 @@ pipeline {
                     sh 'git diff --name-only $GIT_COMMIT'
                     def changes = sh(script: cmd, returnStdout: true)
                     echo changes
-                    echo changes
                     echo 'aiushdiaushd'
                     infraHasChanged(changes.tokenize(','))
                 }
