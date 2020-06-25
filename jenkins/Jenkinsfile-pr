@@ -7,13 +7,11 @@ pipeline {
                 checkout scm
 
                 sh 'ls -la'
-                sh 'env'
             }
         }
 
         stage('Identify Changes') {
             steps {
-                sh 'env'
 
                 script {
                     def cmd = "git diff --name-only origin/master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),/\\1 /'" //| sed 's/\\(.*\\),.*/\\1/'
