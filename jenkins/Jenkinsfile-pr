@@ -17,11 +17,20 @@ pipeline {
 
                 script {
                     def cmd = "git diff --name-only origin/master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),/\\1 /'" //| sed 's/\\(.*\\),.*/\\1/'
-                    sh 'git diff --name-only $GIT_COMMIT'
                     def changes = sh(script: cmd, returnStdout: true)
                     echo changes
-                    echo 'aiushdiaushd'
-                    infraHasChanged(changes.tokenize(','))
+                    
+                    if (infraHasChanged(changes.tokenize(','))) {
+                        echo "Infra has changes"
+                    } else {
+                        echo "Infra does not have any changes"
+                    }
+
+                    if (appHasChanged(changes.tokenize(','))) {
+                        echo "App has changes"
+                    } else {
+                        echo "App does not have any changes"
+                    }
                 }
             }
         }
@@ -29,8 +38,25 @@ pipeline {
 }
 
 def infraHasChanged(changes) {
-    echo "123123123"
+    def found = false
+
     changes.each { change ->
-        echo change
+        if (change.contains("aws/"))
+            found = true
     }
+
+    return found
+}
+
+def appHasChanged(changes) {
+    def found = false
+
+    changes.each { change ->
+        if (change.contains("src/"))
+            found = true
+        else if (!change.contains("/")) // Files at the root level belong to the app
+            found = true
+    }
+
+    return found
 }
