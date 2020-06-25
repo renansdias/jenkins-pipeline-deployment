@@ -1,60 +1,83 @@
 pipeline {
-    agent any 
-
-    stages {
-        stage('Clone Repo') {
-            steps {
-                checkout scm
-
-                sh 'ls -la'
-            }
-        }
-
-        stage('Identify Changes') {
-            steps {
-
-                script {
-                    def cmd = "git diff --name-only origin/master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),/\\1 /'" //| sed 's/\\(.*\\),.*/\\1/'
-                    def changes = sh(script: cmd, returnStdout: true)
-                    echo changes
-                    
-                    if (infraHasChanged(changes.tokenize(','))) {
-                        echo "Infra has changes"
-                    } else {
-                        echo "Infra does not have any changes"
-                    }
-
-                    if (appHasChanged(changes.tokenize(','))) {
-                        echo "App has changes"
-                    } else {
-                        echo "App does not have any changes"
-                    }
-                }
-            }
-        }
+  agent {
+    docker {
+      image 'node:7-alpine'
     }
+  }
+
+  environment {
+    APP_CHANGES   = false
+    INFRA_CHANGES = false
+  }
+
+  stages {
+    stage('Clone Repo') {
+      steps {
+        checkout scm
+
+        sh 'ls -la'
+      }
+    }
+
+    stage('Identify Changes') {
+      steps {
+        script {
+          def cmd = "git diff --name-only origin/master $GIT_COMMIT | tr '\n\r' ',' | sed 's/\\(.*\\),/\\1 /'" //| sed 's/\\(.*\\),.*/\\1/'
+          def changes = sh(script: cmd, returnStdout: true)
+          echo changes
+          
+          INFRA_CHANGES = infraHasChanged(changes.tokenize(','))
+          APP_CHANGES = appHasChanged(changes.tokenize(','))
+        }
+      }
+    }
+
+    stage('Infra - Validate') {
+      when {
+        expression {
+          INFRA_CHANGES == true
+        }
+      }
+
+      steps {
+        echo 'INFRA KICKING OFF'
+      }
+    }
+
+    stage('App - Build') {
+      when {
+        expression {
+          APP_CHANGES == true
+        }
+      }
+
+      steps {
+        echo 'APP INSTALL DEP'
+      }
+    }
+  }
 }
 
 def infraHasChanged(changes) {
-    def found = false
+  def found = false
 
-    changes.each { change ->
-        if (change.contains("aws/"))
-            found = true
-    }
+  changes.each { change ->
+    if (change.contains("aws/"))
+      found = true
+  }
 
-    return found
+  return found
 }
 
 def appHasChanged(changes) {
-    def found = false
+  def found = false
 
-    changes.each { change ->
-        if (change.contains("src/"))
-            found = true
-        else if (!change.contains("/")) // Files at the root level belong to the app
-            found = true
-    }
+  changes.each { change ->
+    if (change.contains("src/"))
+      found = true
+    else if (!change.contains("/")) // Files at the root level belong to the app
+      found = true
+  }
 
-    return found
+  return found
 }
